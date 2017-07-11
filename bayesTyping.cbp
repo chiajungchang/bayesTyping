@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="bayesTyping" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/bayesTyping" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters="-r /home/lawlojohn/hla/test/tmp5/S-17_A.fa -g /home/lawlojohn/hla/typingDB/A_distGenes1.1.fasta -c 1 -ds -sd 200 -od S-17_A.sample -oa S-17_A.aln -ob S-17_A.typing -rf -or S-17_A.real -op S-17_A" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-DSEQAN_ENABLE_DEBUG=1" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/bayesTyping" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-lrt" />
+			<Add option="-fopenmp" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Linker>
+			<Add option="-fopenmp" />
+		</Linker>
+		<Unit filename="HlaStore.h" />
+		<Unit filename="Typing.h" />
+		<Unit filename="bayesTyping.h" />
+		<Unit filename="main.cpp" />
+		<Unit filename="options.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

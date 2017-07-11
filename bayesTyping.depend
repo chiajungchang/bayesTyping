@@ -1,0 +1,58 @@
+# depslib dependency file v1.0
+1473177926 source:/home/lawlojohn/project/bayesTyping/main.cpp
+	<seqan/arg_parse.h>
+	<seqan/seq_io.h>
+	<iostream>
+	<fstream>
+	<omp.h>
+	<string>
+	<seqan/store.h>
+	"bayesTyping.h"
+	"options.h"
+
+1473177926 /home/lawlojohn/project/bayesTyping/bayesTyping.h
+	<seqan/basic.h>
+	<seqan/align.h>
+	<seqan/modifier.h>
+	<seqan/arg_parse.h>
+	<seqan/seq_io.h>
+	<seqan/stream.h>
+	<omp.h>
+	<limits.h>
+	<string>
+	<sstream>
+	<seqan/store.h>
+	<seqan/consensus.h>
+	<seqan/random.h>
+	<set>
+	<queue>
+	"HlaStore.h"
+	"Typing.h"
+	"options.h"
+
+1473715569 /home/lawlojohn/project/bayesTyping/HlaStore.h
+	<seqan/basic.h>
+	<seqan/align.h>
+	<seqan/modifier.h>
+	<seqan/arg_parse.h>
+	<seqan/seq_io.h>
+	<seqan/stream.h>
+	<omp.h>
+	<limits.h>
+	<string>
+	<sstream>
+	<seqan/store.h>
+	<seqan/consensus.h>
+	<seqan/random.h>
+	"options.h"
+
+1473377077 /home/lawlojohn/project/bayesTyping/options.h
+	<seqan/arg_parse.h>
+	<seqan/sequence.h>
+
+1473179690 /home/lawlojohn/project/bayesTyping/Typing.h
+	<vector>
+	<seqan/sequence.h>
+	<omp.h>
+	"options.h"
+
