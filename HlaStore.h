@@ -22,6 +22,8 @@ using namespace seqan;
 typedef Index<StringSet<Dna5String>, IndexQGram<Shape<Dna, UngappedShape<11> >, OpenAddressing> > TIndex;
 typedef Pattern<TIndex, Swift<SwiftSemiGlobal> > TPattern;
 typedef Finder<Dna5String, Swift<SwiftSemiGlobal> > TFinder;
+typedef Align<Dna5String, ArrayGaps> TAlign;
+
 struct BestHit
 {
 	int bestAllele;
@@ -605,9 +607,35 @@ int HlaStore::writeSampling(CharString outSamplingFile){
 	}
 }
 
+int recalAlignScore(TAlign align, int mismatch_score,int gap_score)
+{
+    typedef Row<TAlign>::Type TRow;
+    typedef Iterator<TRow>::Type TRowIterator;
+    TRowIterator it0 = begin(row(align,0)),
+                it1=begin(row(align,1)),
+                itEnd=end(row(align,0));
+    int score=0;
+    for(;it0!=itEnd;it0++,it1++)
+    {
+
+        if(isGap(it0) || isGap(it1))
+        {
+            score += gap_score;
+
+        }
+        else if(*it0 != *it1)
+        {
+          //  cout << "mismatch:" << *it0 << " " << *it1 << endl;
+            score += mismatch_score;
+        }
+
+    }
+    return score;
+
+}
 void HlaStore::pwAlign(Options & options){
 
-	typedef Align<Dna5String, ArrayGaps> TAlign;
+
 
 	SEQAN_OMP_PRAGMA(parallel for)
 	for(int i=0;i<length(readseqs);++i)
@@ -622,6 +650,7 @@ void HlaStore::pwAlign(Options & options){
 		int boundRation=1;
 		int curGroup=0;
 		int groupj=0;
+		int basescore=0;
 		for(int j=0;j<length(refseqs);++j)
 		{
         //    if(j==237)
@@ -629,6 +658,7 @@ void HlaStore::pwAlign(Options & options){
 			int score;
 			int lbound;
 			int ubound;
+			int reScore;
 			if(alleleGroup[j]!=curGroup){
 				curGroup=alleleGroup[j];
 				groupj=j;
@@ -648,24 +678,20 @@ void HlaStore::pwAlign(Options & options){
     			if(fscore>rscore){
     				score=fscore;
     				matchString=infix(readseqs[i], beginPosition(row(falign,1)), endPosition(row(falign,1)))  ;
-    				//lbound = toViewPosition(row(falign, 1), 0) - options.frame;
-    				//ubound =  length(refseqs[j])-(toSourcePosition(row(falign,0),toViewPosition(row(falign, 1), length(matchString))) + options.frame);
-    			//	lbound = beginPosition(row(falign,0))-options.frame;
-    			//	ubound =  length(refseqs[j])- endPosition(row(falign,0))-options.frame;
-                    lbound = beginPosition(row(falign,0));//-options.frame;
-                    ubound = endPosition(row(falign,0));//+options.frame;
+
+                    lbound = beginPosition(row(falign,0));
+                    ubound = endPosition(row(falign,0));
+
 					if(options.test)
    		 				cout << falign << endl;
     			}
     			else{
     				score=rscore;
     				matchString=infix(matchString, beginPosition(row(ralign,1)), endPosition(row(ralign,1)))  ;
-    				//lbound = toViewPosition(row(ralign, 1), 0) - options.frame;
-    				//ubound = length(refseqs[j])-(toSourcePosition(row(ralign,0),toViewPosition(row(ralign, 1), length(matchString))) + options.frame);
-    				//lbound = beginPosition(row(ralign,0))-options.frame;
-    				//ubound =  length(refseqs[j])- endPosition(row(ralign,0))-options.frame;
-    				 lbound = beginPosition(row(ralign,0));//-options.frame;
-                    ubound = endPosition(row(ralign,0));//+options.frame;
+
+    				 lbound = beginPosition(row(ralign,0));
+                    ubound = endPosition(row(ralign,0));
+
 					if(options.test)
     					cout << ralign << endl;
 
@@ -690,8 +716,20 @@ void HlaStore::pwAlign(Options & options){
 					}
     			}
 
+
+
     			if(boundRation>=options.maxBand){
     				score=0;
+    			}
+    			else{
+                    TAlign align;
+                    resize(rows(align), 2);
+                    assignSource(row(align, 0), infix(refseqs[j],lbound,ubound));
+                    assignSource(row(align, 1), matchString);
+                    globalAlignment(align, Score<int, Simple>(options.match, options.mismatch, options.affineExtend,options.affineOpen), AlignConfig<false, false, false, false>(),-1*boundRation*options.frame,boundRation*options.frame);
+                    reScore = recalAlignScore(align,options.mismatch,options.affineOpen);
+                    basescore=score-reScore;
+
     			}
 			}
 			else{
@@ -706,8 +744,13 @@ void HlaStore::pwAlign(Options & options){
                         cout << "Trimmed " << infix(refseqs[j],curlbound,curubound) << endl;
 
                     }
-					score = globalAlignmentScore(infix(refseqs[j],curlbound,curubound),matchString, Score<int, Simple>(options.match, options.mismatch, options.affineExtend,options.affineOpen), AlignConfig<false, false, false, false>(),-1*boundRation*options.frame,boundRation*options.frame);
-
+                    TAlign align;
+                    resize(rows(align), 2);
+                    assignSource(row(align, 0), infix(refseqs[j],curlbound,curubound));
+                    assignSource(row(align, 1), matchString);
+					score = globalAlignment(align, Score<int, Simple>(options.match, options.mismatch, options.affineExtend,options.affineOpen), AlignConfig<false, false, false, false>(),-1*boundRation*options.frame,boundRation*options.frame);
+                    if(score>0)
+                        score = basescore + recalAlignScore(align,options.mismatch,options.affineOpen);
 				}
 
 			}
